@@ -1,6 +1,10 @@
 package talkiepi
 
 import (
+	"log"
+	"net/http"
+	// "encoding/json"
+	"github.com/julienschmidt/httprouter"
 	"fmt"
 	"github.com/dchote/gumble/gumble"
 	"github.com/dchote/gumble/gumbleopenal"
@@ -12,6 +16,26 @@ import (
 	"time"
 )
 
+func (b *Talkiepi) switchRecord(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+
+	var s string
+	s = ps.ByName("toggle")
+
+	if s == "on" {
+		b.TransmitStart()
+	}
+
+	if s == "off" {
+		b.TransmitStop()
+	}
+}
+
+func (b *Talkiepi) serverSwitchRecord() {
+	router := httprouter.New()
+	router.GET("/mic/:toggle", b.switchRecord)
+	log.Fatal(http.ListenAndServe(":8998", router))
+}
+
 func (b *Talkiepi) Init() {
 	b.Config.Attach(gumbleutil.AutoBitrate)
 	b.Config.Attach(b)
@@ -19,6 +43,7 @@ func (b *Talkiepi) Init() {
 	b.initGPIO()
 
 	b.Connect()
+	b.serverSwitchRecord()
 }
 
 func (b *Talkiepi) CleanUp() {
@@ -67,6 +92,7 @@ func (b *Talkiepi) OpenStream() {
 		os.Exit(1)
 	} else {
 		b.Stream = stream
+		// b.TransmitStart()
 	}
 }
 
@@ -142,6 +168,8 @@ func (b *Talkiepi) OnDisconnect(e *gumble.DisconnectEvent) {
 	} else {
 		fmt.Printf("Connection to %s disconnected (%s), attempting again in 10 seconds...\n", b.Address, reason)
 	}
+
+	// b.TransmitStart()
 
 	// attempt to connect again
 	b.ReConnect()

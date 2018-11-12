@@ -18,13 +18,13 @@ func (b *Talkiepi) initGPIO() {
 		b.GPIOEnabled = true
 	}
 
-	ButtonPinPullUp := rpio.Pin(ButtonPin)
-	ButtonPinPullUp.PullUp()
+	/* ButtonPinPullUp := rpio.Pin(ButtonPin)
+	ButtonPinPullUp.PullUp() */
 
 	rpio.Close()
 
 	// unfortunately the gpio watcher stuff doesnt work for me in this context, so we have to poll the button instead
-	b.Button = gpio.NewInput(ButtonPin)
+	/* b.Button = gpio.NewInput(ButtonPin)
 	go func() {
 		for {
 			currentState, err := b.Button.Read()
@@ -46,7 +46,7 @@ func (b *Talkiepi) initGPIO() {
 
 			time.Sleep(500 * time.Millisecond)
 		}
-	}()
+	}() */
 
 	// then we can do our gpio stuff
 	b.OnlineLED = gpio.NewOutput(OnlineLEDPin, false)
